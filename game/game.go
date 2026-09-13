@@ -43,6 +43,11 @@ const (
 
 
 func (g *Game) MakeMove(row, col int) error {
+	// SECURITY: Prevent out of bounds attacks
+	if row < 0 || row > 2 || col < 0 || col > 2 {
+		return errors.New("invalid move: out of bounds")
+	}
+
 	if g.Board[row][col] != None {
 		return errors.New("cell is already taken!")
 	}

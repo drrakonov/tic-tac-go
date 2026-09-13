@@ -40,16 +40,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.cursor[1] < 2 {
 				m.cursor[1]++
 			}
+		case "enter", " ":
+			if m.game.Status != game.Finished {
+				m.game.MakeMove(m.cursor[0], m.cursor[1])
+			}
 		}
+		
 	}
 	return m, nil
 }
 
 func cellToString(c game.Cell, isCursor bool) string {
 	str := " "
-	if c == game.Circle {
+	switch c {
+	case game.Circle:
 		str = "O"
-	} else if c == game.Cross {
+	case game.Cross:
 		str = "X"
 	}
 
@@ -76,10 +82,32 @@ func (m model) View() string {
 		cellToString(m.game.Board[2][2], m.cursor[0] == 2 && m.cursor[1] == 2),
 	)
 	
-	return row0 + "-----------\n" + row1 + "-----------\n" + row2
+	boardStr := row0 + "-----------\n" + row1 + "-----------\n" + row2
+
+	if m.game.Status == game.Finished {
+		winner := m.game.CheckWinner()
+		if winner == game.None {
+			boardStr += "\n\nGame Over! It's a Draw! 🤝"
+		} else {
+			boardStr += fmt.Sprintf("\n\nGame Over! %s Wins! 🎉", cellToString(winner, false))
+		}
+		boardStr += "\nPress 'q' to quit."
+	} else {
+		// Tell them whose turn it is
+        boardStr += fmt.Sprintf("\n\nCurrent Turn: %s", cellToString(m.game.CurrentTurn, false))
+	}
+
+	return boardStr
+
 }
 
 func main() {
-	p := tea.NewProgram(model{})
+	initialModel := model {
+		game: game.Game {
+			CurrentTurn:  game.Cross, // X Goes first
+		},
+	}
+
+	p := tea.NewProgram(initialModel)
 	p.Run()
 }

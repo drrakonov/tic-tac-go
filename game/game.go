@@ -49,7 +49,12 @@ func (g *Game) MakeMove(row, col int) error {
 
 	//Make move & Change the current turn
 	g.Board[row][col] = g.CurrentTurn
-	
+
+	if g.CheckWinner() != None || g.IsDraw() {
+		g.Status = Finished
+		return nil
+	}
+
 	if g.CurrentTurn == Cross {
 		g.CurrentTurn = Circle
 	} else {
